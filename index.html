@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Database Developer & Perumahan</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input, textarea, button {
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .success-message {
+      text-align: center;
+      color: green;
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      margin-top: 40px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+    td a {
+      color: #1d6f42;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>📋 Form Developer & List Data</h1>
+  <form id="dataForm">
+    <input type="text" name="developer" placeholder="Nama Developer" required />
+    <input type="text" name="perumahan" placeholder="Nama Perumahan" required />
+    <input type="text" name="pemilik" placeholder="Nama Pemilik No HP" required />
+    <input type="tel" name="nohp" placeholder="Nomor HP (08xxxx)" required />
+    <input type="text" name="kerjasama" placeholder="Status Kerja Sama (Ya/Tidak)" required />
+    <textarea name="keterangan" placeholder="Keterangan Tambahan" rows="3"></textarea>
+    <button type="submit">Kirim</button>
+  </form>
+  <div class="success-message" id="successMessage"></div>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Nama Developer</th>
+        <th>Nama Perumahan</th>
+        <th>Pemilik No HP</th>
+        <th>No HP</th>
+        <th>Kerja Sama</th>
+        <th>Keterangan</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const scriptURL = 'https://script.google.com/macros/s/AKfycbzFlIugL5g5TYgabg3XpdQFBk1jYkDSFSBBQgenaJZUCKmmryrm4EuzBEHEtD6LsCg1/exec
+'; // Ganti dengan URL Google Apps Script untuk POST
+const sheetDataURL = 'https://script.google.com/macros/s/AKfycbzFlIugL5g5TYgabg3XpdQFBk1jYkDSFSBBQgenaJZUCKmmryrm4EuzBEHEtD6LsCg1/exec
+'; // Ganti dengan URL Google Apps Script untuk GET JSON
+
+const form = document.getElementById('dataForm');
+const successMessage = document.getElementById('successMessage');
+const dataTableBody = document.querySelector('#dataTable tbody');
+
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  const data = new FormData(form);
+  fetch(scriptURL, { method: 'POST', body: data })
+    .then(response => {
+      successMessage.textContent = "✅ Data berhasil dikirim!";
+      form.reset();
+      setTimeout(() => {
+        successMessage.textContent = "";
+        fetchData(); // Refresh tabel setelah submit
+      }, 1500);
+    })
+    .catch(error => {
+      successMessage.textContent = "❌ Gagal mengirim data.";
+    });
+});
+
+function formatWaLink(nomor) {
+  const no = nomor.replace(/^0/, "62");
+  return `https://wa.me/${no}`;
+}
+
+function fetchData() {
+  fetch(sheetDataURL)
+    .then(res => res.json())
+    .then(data => {
+      dataTableBody.innerHTML = "";
+      const rows = data.slice(1); // skip header
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row[0]}</td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+          <td><a href="${formatWaLink(row[3])}" target="_blank">${row[3]}</a></td>
+          <td>${row[4]}</td>
+          <td>${row[5]}</td>
+        `;
+        dataTableBody.appendChild(tr);
+      });
+    });
+}
+
+window.onload = fetchData;
+</script>
+
+</body>
+</html>
